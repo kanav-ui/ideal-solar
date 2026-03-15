@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TerraVolt BioWorks — Interactive Demo</title>
+  <meta name="description" content="TerraVolt BioWorks — BioSolar Mycelium Grids. Interactive demo dashboard, mock adoption, and team page." />
+  <style>
+    :root{
+      --bg:#071827; --card:#0b1220; --accent:#2dd4bf; --muted:#94a3b8; --glass: rgba(255,255,255,0.03);
+      --accent-2:#60a5fa; --success:#16a34a; --danger:#ef4444; --maxw:1100px;
+      font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#04101a 0%, #071827 70%);color:#e6eef6;line-height:1.45}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;max-width:var(--maxw);margin:0 auto}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#042027}
+    nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:700}
+    nav a.active{color:#fff}
+    main{max-width:var(--maxw);margin:18px auto;padding:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    h1,h2,h3{margin-top:0}
+    p.lead{color:var(--muted);margin:0 0 12px}
+    .btn{background:var(--accent);color:#042027;padding:10px 14px;border-radius:10px;border:none;font-weight:800;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(45,212,191,0.12)}
+    .small{font-size:12px;color:var(--muted)}
+    footer{max-width:var(--maxw);margin:28px auto;padding:18px;color:var(--muted);text-align:center;font-size:13px}
+
+    /* Home */
+    .home-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:center}
+    .home-graphics{display:flex;flex-direction:column;gap:16px}
+    .svg-ico{width:72px;height:72px}
+    .home-row{display:flex;gap:12px;align-items:center}
+    .home-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+    /* Demo dashboard */
+    .demo-layout{display:grid;grid-template-columns:2.1fr 1fr;gap:18px;align-items:flex-start}
+    .grid-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+    select{background:transparent;border:1px solid rgba(255,255,255,0.08);color:#e6eef6;padding:8px;border-radius:8px;font-size:13px}
+    .grid-demo{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+    .tile{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);height:72px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s}
+    .tile:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,0.6)}
+    .tile-adopted{outline:3px solid rgba(45,212,191,0.18);box-shadow:0 10px 30px rgba(45,212,191,0.12)}
+    .demo-right{display:flex;flex-direction:column;gap:12px}
+    .fun-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:6px 10px;border-radius:999px;font-weight:800;color:#042027;font-size:12px}
+    .energy-graph{height:120px;width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:8px;display:flex;align-items:flex-end;gap:6px}
+    .bar{flex:1;border-radius:6px;background:linear-gradient(180deg,var(--accent-2),var(--accent));display:flex;align-items:flex-end;justify-content:center;color:#042027;font-weight:800;font-size:10px}
+    .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+    .stat{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;min-width:130px}
+    .demo-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
+    /* Animations */
+    .sun { animation: float 6s ease-in-out infinite; transform-origin:center; }
+    .mycel { animation: wiggle 4s ease-in-out infinite; transform-origin:center; }
+    @keyframes float { 0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)} }
+    @keyframes wiggle { 0%{transform:rotate(0)}25%{transform:rotate(3deg)}50%{transform:rotate(0)}75%{transform:rotate(-3deg)}100%{transform:rotate(0)} }
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:40}
+    .modal.open{display:flex}
+    .modal .panel{width:420px;background:linear-gradient(180deg,#071827,#0b1220);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+
+    label{display:block;font-size:13px;color:var(--muted);margin-top:10px}
+    input[type="text"],input[type="number"],input[type="email"],textarea{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef6}
+
+    .success{color:var(--success);font-weight:700}
+    .danger{color:var(--danger);font-weight:700}
+
+    @media (max-width:980px){
+      .home-layout{grid-template-columns:1fr}
+      .demo-layout{grid-template-columns:1fr}
+      .grid-demo{grid-template-columns:repeat(4,1fr)}
+    }
+    @media (max-width:600px){
+      .grid-demo{grid-template-columns:repeat(3,1fr)}
+      header{padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden>TV</div>
+      <div>
+        <div style="font-weight:900">TerraVolt BioWorks</div>
+        <div style="font-size:12px;color:var(--muted)">Powering land, restoring life</div>
+      </div>
+    </div>
+    <nav aria-label="Main navigation">
+      <a href="#" id="nav-home" class="active">Home</a>
+      <a href="#" id="nav-demo">Demo</a>
+      <a href="#" id="nav-adopt">Adopt a Tile</a>
+      <a href="#" id="nav-about">About Us</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section id="page-home">
+      <div class="card home-layout">
+        <div>
+          <h1>BioSolar Mycelium Grids</h1>
+          <p class="lead">
+            TerraVolt BioWorks designs modular tiles that blend flexible solar, mycelium biofabrication,
+            and microbial fuel cells to generate clean energy while restoring land.
+          </p>
+          <p>
+            Explore our interactive demo dashboard, adopt a tile through a mock payment flow,
+            and meet the team behind the concept.
+          </p>
+          <div class="home-actions">
+            <button class="btn" id="home-go-demo">Launch Demo</button>
+            <button class="btn ghost" id="home-go-adopt">Adopt a Tile</button>
+            <button class="btn ghost" id="home-go-about">Meet the Team</button>
+          </div>
+        </div>
+        <div class="home-graphics">
+          <div class="home-row">
+            <svg class="svg-ico sun" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <circle cx="32" cy="32" r="12" fill="#FFD166"/>
+              <g fill="#FFD166" opacity="0.9">
+                <rect x="30" y="2" width="4" height="10" rx="2"/>
+                <rect x="30" y="52" width="4" height="10" rx="2"/>
+                <rect x="2" y="30" width="10" height="4" rx="2"/>
+                <rect x="52" y="30" width="10" height="4" rx="2"/>
+                <rect x="8" y="8" width="4" height="10" rx="2" transform="rotate(-45 10 13)"/>
+                <rect x="52" y="8" width="4" height="10" rx="2" transform="rotate(45 54 13)"/>
+                <rect x="8" y="46" width="4" height="10" rx="2" transform="rotate(45 10 51)"/>
+                <rect x="52" y="46" width="4" height="10" rx="2" transform="rotate(-45 54 51)"/>
+              </g>
+            </svg>
+            <div>
+              <div style="font-weight:800">Solar + Living Tiles</div>
+              <div class="small">Flexible solar film on mycelium substrates.</div>
+            </div>
+          </div>
+          <div class="home-row">
+            <svg class="svg-ico mycel" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <rect x="6" y="36" width="52" height="18" rx="4" fill="#8EE4C7"/>
+              <path d="M10 36c6-8 18-10 28-6s18 12 18 16" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="20" cy="28" r="6" fill="#60a5fa" opacity="0.9"/>
+              <circle cx="36" cy="22" r="4" fill="#60a5fa" opacity="0.9"/>
+              <circle cx="48" cy="26" r="5" fill="#60a5fa" opacity="0.9"/>
+            </svg>
+            <div>
+              <div style="font-weight:800">Soil Healing</div>
+              <div class="small">Microbes, moisture capture, and organic matter.</div>
+            </div>
+          </div>
+          <div class="home-row">
+            <svg class="svg-ico" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+              <rect x="8" y="12" width="48" height="28" rx="4" fill="#FFD166"/>
+              <rect x="12" y="18" width="40" height="18" rx="2" fill="#FFB703"/>
+            </svg>
+            <div>
+              <div style="font-weight:800">Microbial Fuel Cells</div>
+              <div class="small">Night-time microcurrent for sensors and data.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMO -->
+<section id="page-demo" style="display:none;">
+  <div class="card">
+    <h2>Mycelium Tile Demo</h2>
+    <p class="lead">A looping animation showing how mycelium tiles regenerate soil and capture solar energy.</p>
+
+    <div class="demo-layout" style="display:grid;grid-template-columns:1fr;gap:20px;">
+
+      <!-- FULL-WIDTH ANIMATION -->
+      <div>
+        <div class="card" style="overflow:hidden;position:relative;height:360px;border-radius:12px;">
+
+          <!-- Sunlight -->
+          <div class="sunlight"></div>
+
+          <!-- Soil layers -->
+          <div class="soil-layer layer1"></div>
+          <div class="soil-layer layer2"></div>
+          <div class="soil-layer layer3"></div>
+
+          <!-- Mycelium network -->
+          <canvas id="myceliumCanvas" width="800" height="360" style="position:absolute;bottom:0;left:0;width:100%;height:100%;"></canvas>
+
+          <!-- Energy particles -->
+          <div id="energyParticles"></div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+/* Sunlight pulse */
+.sunlight {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:40%;
+  background:linear-gradient(to bottom, rgba(255,230,150,0.6), transparent);
+  animation:sunPulse 10s ease-in-out infinite;
+}
+@keyframes sunPulse {
+  0% { opacity:0.4; }
+  50% { opacity:0.9; }
+  100% { opacity:0.4; }
+}
+
+/* Soil layers */
+.soil-layer {
+  position:absolute;
+  left:0;
+  width:100%;
+  height:33%;
+  animation:soilHeal 10s ease-in-out infinite;
+}
+.layer1 { bottom:0; background:#3b2f1c; }
+.layer2 { bottom:33%; background:#4a3a22; }
+.layer3 { bottom:66%; background:#5c4a2a; }
+
+@keyframes soilHeal {
+  0% { filter:brightness(0.8); }
+  50% { filter:brightness(1.2); }
+  100% { filter:brightness(0.8); }
+}
+
+/* Energy particles */
+#energyParticles div {
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(120,255,180,0.8);
+  animation:particleRise 3s linear infinite;
+}
+@keyframes particleRise {
+  0% { transform:translateY(0) scale(0.4); opacity:0.4; }
+  50% { opacity:1; }
+  100% { transform:translateY(-120px) scale(1); opacity:0; }
+}
+</style>
+
+<script>
+// Generate floating energy particles
+const particleContainer = document.getElementById("energyParticles");
+for (let i = 0; i < 25; i++) {
+  const p = document.createElement("div");
+  p.style.left = Math.random() * 100 + "%";
+  p.style.bottom = Math.random() * 40 + "px";
+  p.style.animationDuration = 3 + Math.random() * 3 + "s";
+  particleContainer.appendChild(p);
+}
+
+// Mycelium network animation (canvas)
+const canvas = document.getElementById("myceliumCanvas");
+const ctx = canvas.getContext("2d");
+
+function drawMycelium() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(200,255,220,0.5)";
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i < 20; i++) {
+    ctx.beginPath();
+    let x = Math.random() * canvas.width;
+    let y = canvas.height;
+    ctx.moveTo(x, y);
+
+    for (let j = 0; j < 6; j++) {
+      x += (Math.random() - 0.5) * 80;
+      y -= Math.random() * 40;
+      ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+  }
+}
+
+setInterval(drawMycelium, 1000);
+drawMycelium();
+</script>
+
+<style>
+/* Sunlight pulse */
+.sunlight {
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:40%;
+  background:linear-gradient(to bottom, rgba(255,230,150,0.6), transparent);
+  animation:sunPulse 10s ease-in-out infinite;
+}
+@keyframes sunPulse {
+  0% { opacity:0.4; }
+  50% { opacity:0.9; }
+  100% { opacity:0.4; }
+}
+
+/* Soil layers */
+.soil-layer {
+  position:absolute;
+  left:0;
+  width:100%;
+  height:33%;
+  animation:soilHeal 10s ease-in-out infinite;
+}
+.layer1 { bottom:0; background:#3b2f1c; }
+.layer2 { bottom:33%; background:#4a3a22; }
+.layer3 { bottom:66%; background:#5c4a2a; }
+
+@keyframes soilHeal {
+  0% { filter:brightness(0.8); }
+  50% { filter:brightness(1.2); }
+  100% { filter:brightness(0.8); }
+}
+
+/* Energy particles */
+#energyParticles div {
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(120,255,180,0.8);
+  animation:particleRise 3s linear infinite;
+}
+@keyframes particleRise {
+  0% { transform:translateY(0) scale(0.4); opacity:0.4; }
+  50% { opacity:1; }
+  100% { transform:translateY(-120px) scale(1); opacity:0; }
+}
+</style>
+
+<script>
+// Generate floating energy particles
+const particleContainer = document.getElementById("energyParticles");
+for (let i = 0; i < 25; i++) {
+  const p = document.createElement("div");
+  p.style.left = Math.random() * 100 + "%";
+  p.style.bottom = Math.random() * 40 + "px";
+  p.style.animationDuration = 3 + Math.random() * 3 + "s";
+  particleContainer.appendChild(p);
+}
+
+// Mycelium network animation (canvas)
+const canvas = document.getElementById("myceliumCanvas");
+const ctx = canvas.getContext("2d");
+
+function drawMycelium() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(200,255,220,0.5)";
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i < 20; i++) {
+    ctx.beginPath();
+    let x = Math.random() * canvas.width;
+    let y = canvas.height;
+    ctx.moveTo(x, y);
+
+    for (let j = 0; j < 6; j++) {
+      x += (Math.random() - 0.5) * 80;
+      y -= Math.random() * 40;
+      ctx.lineTo(x, y);
+    }
+
+    ctx.stroke();
+  }
+}
+
+setInterval(drawMycelium, 1000);
+drawMycelium();
+</script>
+    <!-- ADOPT -->
+    <section id="page-adopt" style="display:none">
+      <div class="card">
+        <h2>Adopt a Tile — Mock Payment</h2>
+        <p class="lead">Support a restoration tile. This demo simulates a payment flow without processing real payments.</p>
+
+        <form id="adopt-form" onsubmit="return false" aria-label="Adopt a tile form">
+          <label for="name">Your name</label>
+          <input id="name" type="text" required placeholder="John Doe" />
+
+          <label for="email">Email</label>
+          <input id="email" type="email" required placeholder="you@example.com" />
+
+          <label for="qty">Number of tiles to adopt</label>
+          <input id="qty" type="number" min="1" max="1000" value="1" />
+
+          <label for="plan">Support plan</label>
+          <select id="plan">
+            <option value="one">One-time adoption — $25/tile</option>
+            <option value="monthly">Monthly stewardship — $5/tile/month</option>
+          </select>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn" id="mock-pay">Proceed (Mock)</button>
+            <button class="btn ghost" id="cancel-adopt">Cancel</button>
+          </div>
+
+          <div id="mock-result" style="margin-top:12px;font-size:14px"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="page-about" style="display:none">
+      <div class="card">
+        <h2>About TerraVolt BioWorks</h2>
+        <p class="lead">
+          TerraVolt BioWorks is a student‑founded innovation group developing BioSolar Mycelium Grids —
+          modular tiles that generate clean energy while restoring degraded land. Our mission is to merge
+          biotechnology, renewable energy, and ecological design into one scalable solution.
+        </p>
+
+        <h3>Mission</h3>
+        <p>
+          Deliver scalable, low‑cost solutions that advance SDG 7 (Affordable and Clean Energy)
+          and SDG 15 (Life on Land), while creating local green jobs and resilient communities.
+        </p>
+
+        <h3>Founders</h3>
+        <ul>
+          <li><strong>Abirbhav Dutta</strong> — Systems & Energy Integration Lead</li>
+          <li><strong>Dhyeya Panpaliya</strong> — Materials & Biofabrication Lead</li>
+          <li><strong>Kanav Mittal</strong> — Concept Architect & Strategy Lead</li>
+          <li><strong>Mohd. Arham Khalil</strong> — Environmental & Soil Regeneration Lead</li>
+          <li><strong>Tanmay Handa</strong> — Software, Sensors & AI Systems Lead</li>
+        </ul>
+
+        <h3>Contact</h3>
+        <p class="small">
+          This is a demo site. For partnership inquiries, use the mock adoption form or contact us at
+          <em>hello@terravolt.example</em>.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: TILE DETAILS -->
+  <div class="modal" id="modal">
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="modal-title" style="font-weight:800">Tile details</div>
+          <div id="modal-sub" class="small" style="margin-top:6px;color:var(--muted)">Click adopt to support this tile (mock).</div>
+        </div>
+        <button class="btn ghost" id="modal-close">Close</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="small">Tile ID: <span id="tile-id">—</span></div>
+        <div style="margin-top:8px">
+          <div class="small">Daytime energy</div>
+          <div style="font-weight:800" id="tile-energy">0.6 kWh</div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="small">Soil healing</div>
+          <div id="tile-soil" style="font-weight:800">Improving</div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="small">Night baseline</div>
+          <div id="tile-night" style="font-weight:800">MFC active</div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn" id="modal-adopt">Adopt this tile (Mock)</button>
+          <button class="btn ghost" id="modal-close-2">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © <strong>TerraVolt BioWorks</strong> — Demo site. No real payments processed. Built for concept and outreach.
+  </footer>
+
+  <script>
+    // NAVIGATION
+    const pages = {home:'page-home', demo:'page-demo', adopt:'page-adopt', about:'page-about'};
+    function showPage(key){
+      Object.values(pages).forEach(id => document.getElementById(id).style.display = 'none');
+      document.getElementById(pages[key]).style.display = 'block';
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      if(key==='home') document.getElementById('nav-home').classList.add('active');
+      if(key==='demo') document.getElementById('nav-demo').classList.add('active');
+      if(key==='adopt') document.getElementById('nav-adopt').classList.add('active');
+      if(key==='about') document.getElementById('nav-about').classList.add('active');
+    }
+    document.getElementById('nav-home').onclick = e => { e.preventDefault(); showPage('home'); };
+    document.getElementById('nav-demo').onclick = e => { e.preventDefault(); showPage('demo'); };
+    document.getElementById('nav-adopt').onclick = e => { e.preventDefault(); showPage('adopt'); };
+    document.getElementById('nav-about').onclick = e => { e.preventDefault(); showPage('about'); };
+
+    document.getElementById('home-go-demo').onclick = () => showPage('demo');
+    document.getElementById('home-go-adopt').onclick = () => showPage('adopt');
+    document.getElementById('home-go-about').onclick = () => showPage('about');
+
+    // DEMO STATE
+    let GRID_SIZE = 24;
+    const grid = document.getElementById('grid-demo');
+    const energyGraph = document.getElementById('energy-graph');
+    const adoptCountEl = document.getElementById('adopt-count');
+    const mockResult = document.getElementById('mock-result');
+    const badge = document.getElementById('badge');
+
+    let tiles = [];
+
+    function createTiles(n){
+      tiles = [];
+      grid.innerHTML = '';
+      energyGraph.innerHTML = '';
+      for(let i=0;i<n;i++){
+        const t = document.createElement('div');
+        t.className = 'tile';
+        t.tabIndex = 0;
+        t.setAttribute('role','button');
+        t.setAttribute('aria-label','Tile '+(i+1));
+        t.dataset.id = i+1;
+        const energyVal = (0.45 + Math.random()*0.4).toFixed(2);
+        const soilIndex = Math.random();
+        t.innerHTML = `<div>Tile ${i+1}</div>`;
+        t.onclick = () => openTile(i+1);
+        t.onkeypress = (e) => { if(e.key==='Enter') openTile(i+1); };
+        grid.appendChild(t);
+        tiles.push({id:i+1,energy: parseFloat(energyVal),soilIndex: soilIndex,adopted:false});
+      }
+      // energy graph bars
+      for(let i=0;i<8;i++){
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const val = Math.round(20 + Math.random()*80);
+        bar.style.height = val + '%';
+        energyGraph.appendChild(bar);
+      }
+      updateStats();
+      applyViewMode();
+      applyTileStyle();
+      updateAdoptCount();
+    }
+
+    function updateStats(){
+      if(!tiles.length) return;
+      const avg = (tiles.reduce((s,t)=>s+t.energy,0)/tiles.length).toFixed(2);
+      document.getElementById('stat-tile').textContent = `~${avg} kWh`;
+      document.getElementById('stat-hectare').textContent = `~${Math.round(avg*10000)} kWh`;
+      const avgSoil = tiles.reduce((s,t)=>s+t.soilIndex,0)/tiles.length;
+      document.getElementById('stat-soil').textContent = avgSoil>0.6?'Healthy':avgSoil>0.3?'Improving':'Recovering';
+      document.getElementById('stat-bio').textContent = `~${Math.round(10+avgSoil*40)} species`;
+    }
+
+    // MODAL
+    const modal = document.getElementById('modal');
+    const tileIdEl = document.getElementById('tile-id');
+    const tileEnergyEl = document.getElementById('tile-energy');
+    const tileSoilEl = document.getElementById('tile-soil');
+    const tileNightEl = document.getElementById('tile-night');
+
+    function openTile(id){
+      const t = tiles[id-1];
+      if(!t) return;
+      tileIdEl.textContent = t.id;
+      tileEnergyEl.textContent = `${t.energy.toFixed(2)} kWh/day`;
+      tileSoilEl.textContent = t.soilIndex > 0.6 ? 'Healthy' : t.soilIndex > 0.3 ? 'Improving' : 'Recovering';
+      tileNightEl.textContent = 'MFC baseline active';
+      modal.classList.add('open');
+      document.getElementById('modal-adopt').onclick = () => {
+        document.getElementById('qty').value = 1;
+        document.getElementById('plan').value = 'one';
+        showPage('adopt');
+        modal.classList.remove('open');
+        document.getElementById('name').value = `Supporter of Tile ${t.id}`;
+      };
+    }
+    document.getElementById('modal-close').onclick = () => modal.classList.remove('open');
+    document.getElementById('modal-close-2').onclick = () => modal.classList.remove('open');
+    document.addEventListener('keydown', e => { if(e.key==='Escape') modal.classList.remove('open'); });
+
+    // VIEW MODE
+    function applyViewMode(){
+      const mode = document.getElementById('view-mode').value;
+      grid.querySelectorAll('.tile').forEach((el,i)=>{
+        const t = tiles[i];
+        if(!t) return;
+        if(mode==='energy') el.innerHTML = `<div style="font-weight:800;color:#bffcf0">${t.energy.toFixed(2)} kWh</div>`;
+        if(mode==='soil') el.innerHTML = `<div style="font-weight:800;color:#ffd6a5">${(t.soilIndex*100).toFixed(0)}%</div>`;
+        if(mode==='biodiversity') el.innerHTML = `<div style="font-weight:800;color:#c7f9cc">${Math.round(10 + t.soilIndex*40)} sp.</div>`;
+      });
+    }
+    document.getElementById('view-mode').onchange = applyViewMode;
+
+    // TILE STYLE
+    function applyTileStyle(){
+      const style = document.getElementById('tile-style').value;
+      grid.querySelectorAll('.tile').forEach((el)=>{
+        if(style==='hex'){
+          el.style.borderRadius = '18px';
+          el.style.background = 'linear-gradient(180deg, rgba(45,212,191,0.04), transparent)';
+        } else if(style==='camouflage'){
+          el.style.borderRadius = '8px';
+          el.style.background = 'linear-gradient(135deg, rgba(15,118,110,0.25), rgba(15,23,42,0.9))';
+        } else {
+          el.style.borderRadius = '8px';
+          el.style.background = 'linear-gradient(180deg, rgba(255,255,255,0.01), transparent)';
+        }
+      });
+    }
+    document.getElementById('tile-style').onchange = applyTileStyle;
+
+    // BIOME
+    document.getElementById('biome').onchange = (e) => {
+      const v = e.target.value;
+      const label = {coastal:'Coastal', desert:'Desert', postmining:'Post‑mining', urban:'Urban'}[v] || 'Biome';
+      badge.textContent = label;
+      const bars = energyGraph.querySelectorAll('.bar');
+      bars.forEach((b)=>{
+        const base = v==='desert' ? 80 : v==='coastal' ? 60 : v==='postmining' ? 45 : 55;
+        const val = Math.round(base - Math.random()*30);
+        b.style.height = val + '%';
+      });
+    };
+
+    // TILE COUNT
+    document.getElementById('tile-count').onchange = (e) => {
+      GRID_SIZE = parseInt(e.target.value,10);
+      createTiles(GRID_SIZE);
+    };
+
+    // DAY/NIGHT
+    document.getElementById('simulate-day').onclick = () => {
+      grid.querySelectorAll('.tile').forEach((el,i) => {
+        const t = tiles[i];
+        if(!t) return;
+        el.style.background = 'linear-gradient(180deg, rgba(45,212,191,0.12), transparent)';
+        el.innerHTML = `<div style="font-weight:800;color:#042027">${t.energy.toFixed(2)} kWh</div>`;
+      });
+    };
+    document.getElementById('simulate-night').onclick = () => {
+      grid.querySelectorAll('.tile').forEach((el) => {
+        el.style.background = 'linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7))';
+        el.innerHTML = `<div style="color:var(--muted)">MFC baseline</div>`;
+      });
+    };
+
+    // RESET
+    document.getElementById('reset-grid').onclick = () => {
+      createTiles(GRID_SIZE);
+    };
+
+    // ADOPTION
+    function updateAdoptCount(){
+      const adopted = tiles.filter(t => t.adopted).length;
+      adoptCountEl.textContent = adopted;
+      grid.querySelectorAll('.tile').forEach((el,i)=>{
+        if(tiles[i].adopted) el.classList.add('tile-adopted'); else el.classList.remove('tile-adopted');
+      });
+    }
+
+    document.getElementById('mock-pay').onclick = () => {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const qty = Math.max(1, Math.min(1000, parseInt(document.getElementById('qty').value || 1,10)));
+      if(!name || !email){ mockResult.innerHTML = '<div class="danger">Please enter name and email.</div>'; return; }
+
+      mockResult.innerHTML = '<div class="small">Processing mock payment...</div>';
+      setTimeout(() => {
+        let assigned = 0;
+        for(let t of tiles){
+          if(assigned>=qty) break;
+          if(!t.adopted){ t.adopted = true; assigned++; }
+        }
+        localStorage.setItem('tv_adoptions', JSON.stringify(tiles.filter(t=>t.adopted).map(t=>t.id)));
+        mockResult.innerHTML = `<div class="success">Mock success! Adopted ${assigned} tile(s). Thank you, ${name}.</div>`;
+        updateAdoptCount();
+      }, 900);
+    };
+    document.getElementById('cancel-adopt').onclick = () => { showPage('home'); mockResult.innerHTML=''; };
+
+    // INIT
+    (function init(){
+      const saved = JSON.parse(localStorage.getItem('tv_adoptions') || '[]');
+      createTiles(GRID_SIZE);
+      for(const id of saved){
+        const t = tiles[id-1];
+        if(t) t.adopted = true;
+      }
+      updateAdoptCount();
+      // small stagger animation
+      setTimeout(()=>document.querySelectorAll('.tile').forEach((el,i)=>el.style.transitionDelay=(i*8)+'ms'),50);
+    })();
+  </script>
+</body>
+</html>
